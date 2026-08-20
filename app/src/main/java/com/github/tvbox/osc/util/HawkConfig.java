@@ -6,9 +6,14 @@ package com.github.tvbox.osc.util;
  * @description:
  */
 public class HawkConfig {
+    public static final String PARSE_WEBVIEW = "parse_webview"; // true 系统 false xwalk
+    public static final String HOME_REC_STYLE = "home_rec_style";
     public static final String API_URL = "api_url";
+    public static final String LIVE_URL = "live_url";
     public static final String EPG_URL = "epg_url";
     public static final String SHOW_PREVIEW = "show_preview";
+    public static final String SUBSCRIPTIONS = "api_history";
+    public static final String LIVE_HISTORY = "live_history";
     public static final String API_HISTORY = "api_history";
     public static final String API_LINE_LIST = "api_line_list";
     public static final String API_LINE_SOURCE = "api_line_source";
@@ -17,7 +22,6 @@ public class HawkConfig {
     public static final String HOME_API = "home_api";
     public static final String DEFAULT_PARSE = "parse_default";
     public static final String DEBUG_OPEN = "debug_open";
-    public static final String PARSE_WEBVIEW = "parse_webview"; // true 系统 false xwalk
     public static final String IJK_CODEC = "ijk_codec";
     public static final String PLAY_TYPE = "play_type";//0 系统 1 ijk 2 exo 10 MXPlayer
     public static final String LIVE_PLAY_TYPE = "live_play_type";//0 系统 1 ijk 2 exo 10 MXPlayer
@@ -26,9 +30,12 @@ public class HawkConfig {
     public static final String LIVE_PLAY_SCALE = "live_play_scale";
     public static final String PLAY_TIME_STEP = "play_time_step"; //0 texture 2
     public static final String DOH_URL = "doh_url";
-    public static final int DEFAULT_HOME_REC = 1;
-    public static final String HOME_REC = "home_rec"; // 0 豆瓣热播 1 数据源推荐 2 历史
+    /**
+     * 0 豆瓣热播 1 数据源推荐 2 关闭主页
+     */
+    public static final String HOME_REC = "home_rec";
     public static final String HISTORY_NUM = "history_num";
+    public static final int DEFAULT_HOME_REC = 1;
     public static final String HISTORY_MERGE = "history_merge";
     public static final String SEARCH_VIEW = "search_view"; // 0 列表 1 缩略图
     public static final String LIVE_CHANNEL = "last_live_channel_name";
@@ -44,10 +51,33 @@ public class HawkConfig {
     public static final String SUBTITLE_EXO_SCALE = "subtitle_exo_scale";
     public static final String SUBTITLE_EXO_POSITION = "subtitle_exo_position";
     public static final String SOURCES_FOR_SEARCH = "checked_sources_for_search";
-    public static final String HOME_REC_STYLE = "home_rec_style";
     public static final String NOW_DATE = "now_date"; //当前日期
     public static final String REMOTE_TVBOX = "remote_tvbox_host";
     public static final String IJK_CACHE_PLAY = "ijk_cache_play";
+    /**
+     * 无痕浏览
+     */
+    public static final String PRIVATE_BROWSING = "private_browsing";
+    /**
+     * 主题,跟随系统0,浅1,深2
+     */
+    public static final String THEME_TAG = "theme_tag";
+    /**
+     * 后台播放模式 0 关闭,1 开启,2 画中画
+     */
+    public static final String BACKGROUND_PLAY_TYPE = "background_play_type";
+    /**
+     * 广告过滤
+     */
+    public static final String VIDEO_PURIFY = "video_purify";
+    /**
+     * 长按的倍速播放设置
+     */
+    public static final String VIDEO_SPEED = "video_speed";
+    /**
+     * 搜索记录
+     */
+    public static final String HISTORY_SEARCH = "history_search";
     public static final String PLAYER_IS_LIVE = "player_is_live";
     public static final String DOH_JSON = "doh_json";
     public static final String LIVE_GROUP_INDEX = "live_group_index";

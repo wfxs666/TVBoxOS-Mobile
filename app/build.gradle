@@ -1,19 +1,40 @@
 apply plugin: 'com.android.application'
+apply plugin: 'org.jetbrains.kotlin.android'
 
 android {
     compileSdkVersion 33
 
     defaultConfig {
-        applicationId 'com.github.tvbox.osc.jun'
-        targetSdkVersion 28
-        versionCode 1
-        versionName '1.0.0'
+        applicationId 'com.github.tvbox.osc'
+        minSdkVersion 24
+        targetSdkVersion 30
+        versionCode 31
+        versionName '1.1.1'
         multiDexEnabled true
         //设置room的Schema的位置
         javaCompileOptions {
             annotationProcessorOptions {
                 arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
             }
+        }
+
+        ndk {
+            //abiFilters "armeabi-v7a"//, ""
+            abiFilters "arm64-v8a"
+        }
+
+    }
+
+    // 执行配置
+    applicationVariants.all { variant ->
+
+        // Apk 输出配置
+        variant.outputs.all { output ->
+            outputFileName = 'MBox_v' + variant.versionName + '_' + variant.buildType.name
+            if (variant.buildType.name == buildTypes.release.getName()) {
+                outputFileName += '_' + new Date().format("yyyyMMdd")
+            }
+            outputFileName += '.apk'
         }
     }
 
@@ -26,7 +47,7 @@ android {
     productFlavors {
         java {
             dimension "mode"
-            minSdkVersion 19
+            minSdkVersion 21
             ndk {
                 //noinspection ChromeOsAbiSupport
                 abiFilters 'armeabi-v7a', 'arm64-v8a'
@@ -35,7 +56,7 @@ android {
         }
         java32 {
             dimension "mode"
-            minSdkVersion 19
+            minSdkVersion 21
             ndk {
                 //noinspection ChromeOsAbiSupport
                 abiFilters 'armeabi-v7a'
@@ -96,28 +117,23 @@ android {
         }
     }
 
+    signingConfigs {
+        config {
+            keyAlias 'TVBoxOSC'
+            keyPassword 'TVBoxOSC'
+            storeFile file('..\\TVBoxOSC.jks')
+            storePassword 'TVBoxOSC'
+        }
+    }
+
     buildTypes {
         debug {
-            minifyEnabled false
+            signingConfig signingConfigs.config
         }
+
         release {
-            minifyEnabled true
-        }
-    }
-
-    // 禁用 ABI 分割
-    splits {
-        abi {
-            enable false // 禁用 ABI 分割
-        }
-    }
-
-    applicationVariants.configureEach { variant ->
-        variant.outputs.configureEach { output ->
-            def flavorNames = variant.productFlavors.collect { it.name }.join('-')
-            // 构建自定义文件名
-            def fileName = "TVBox_${variant.buildType.name}-${flavorNames}.apk"
-            outputFileName = fileName
+            signingConfig signingConfigs.config
+            minifyEnabled false
         }
     }
 
@@ -130,19 +146,28 @@ android {
         checkReleaseBuilds false
         abortOnError false
     }
-//    dexOptions {
-//        javaMaxHeapSize "4g"
-//        additionalParameters += '--multi-dex'
-//        additionalParameters += '--set-max-idx-number=48000'
-//        additionalParameters += '--minimal-main-dex'
-//    }
+    dexOptions {
+        javaMaxHeapSize "4g"
+        additionalParameters += '--multi-dex'
+        additionalParameters += '--set-max-idx-number=48000'
+        additionalParameters += '--minimal-main-dex'
+    }
+    buildFeatures {
+        viewBinding true
+    }
+
+    packagingOptions {//引入dlna-cast时的文件冲突
+        exclude 'META-INF/beans.xml'
+    }
 }
 
-repositories {
-
-}
 dependencies {
-    api fileTree(dir: "libs", include: ["*.jar","*.aar"])
+    api fileTree(dir: "libs", include: ['*.jar', '*.aar'])
+
+    implementation 'com.google.android.material:material:1.4.0'
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.5.31"
+    implementation 'androidx.core:core-ktx:1.6.0'
 
     implementation 'org.nanohttpd:nanohttpd:2.3.1'
     implementation 'org.fourthline.cling:cling-core:2.1.2'
@@ -156,9 +181,9 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
-//    implementation files('libs/thunder.jar')
-//    implementation files('libs/commons-lang3-3.12.0.jar')
-
+    implementation files('libs/thunder.jar')
+    implementation files('libs/commons-lang3-3.12.0.jar')
+    implementation 'org.conscrypt:conscrypt-android:2.5.2'
 
     implementation 'com.squareup.okhttp3:okhttp:3.12.11'
     annotationProcessor 'androidx.room:room-compiler:2.3.0'
@@ -169,9 +194,7 @@ dependencies {
     implementation 'com.kingja.loadsir:loadsir:1.3.8'
     implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'com.squareup.picasso:picasso:2.71828'
-    implementation 'com.github.bumptech.glide:glide:4.16.0'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.16.0'
-    implementation 'me.jessyan:autosize:1.2.1'
+    implementation 'com.github.JessYanCoding:AndroidAutoSize:v1.2.1'
     implementation('com.thoughtworks.xstream:xstream:1.4.15') {
         exclude group: 'xmlpull', module: 'xmlpull'
     }
@@ -181,10 +204,7 @@ dependencies {
 
     implementation project(":player")
     implementation project(":quickjs")
-    pythonImplementation project(":pyramid")
-    python32Implementation project(":pyramid")
-    python64Implementation project(":pyramid")
-
+    implementation 'net.sourceforge.streamsupport:android-retrofuture:1.7.4'
 
     implementation 'com.lzy.net:okgo:3.0.4'
     // implementation 'com.tencent.bugly:crashreport_upgrade:latest.release'
@@ -195,10 +215,36 @@ dependencies {
     implementation 'com.github.hedzr:android-file-chooser:v1.2.0-final'
     implementation 'commons-io:commons-io:2.11.0'
     implementation 'com.googlecode.juniversalchardet:juniversalchardet:1.0.3'
-    //支持http3
-    implementation ('com.google.net.cronet:cronet-okhttp:0.1.0')
-//    implementation 'com.google.android.gms:play-services-cronet:18.0.1'
-    implementation ('org.chromium.net:cronet-embedded:101.4951.41')
-    implementation 'org.brotli:dec:0.1.2'
-}
 
+    //沉浸式状态栏
+    implementation 'com.geyifeng.immersionbar:immersionbar:3.2.2'
+    //标题栏
+    implementation 'com.github.getActivity:TitleBar:10.5'
+    //弹窗
+    implementation 'com.github.li-xiaojun:XPopup:2.10.0'
+    //工具类
+    implementation 'com.blankj:utilcodex:1.31.0'
+    //阴影/shape/选择器/圆角/...
+    implementation 'com.github.lihangleo2:ShadowLayout:3.3.3'
+    //glide图片加载
+    implementation 'com.github.bumptech.glide:glide:4.12.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
+
+    //tab标题栏
+    implementation project(":TabLayout")
+    implementation project(':ViewPager1Delegate')
+    //TabLayout的非kt项目需要依赖这个包实现点击事件等
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    //展开收缩tv
+    implementation 'com.github.MZCretin:ExpandableTextView:v1.6.1-x'
+    //lottie动画
+    implementation 'com.airbnb.android:lottie:5.2.0'
+    //流式布局
+    implementation 'com.hyman:flowlayout-lib:1.1.2'
+    //崩溃
+    implementation project(":crash")
+    //dlna投屏 (从jitpack不可用的DLNA-Cast V1.0.0源码嵌入为本地模块)
+    implementation project(':dlna-dmc')
+    // Lifecycles only (without ViewModel or LiveData)
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0"
+}

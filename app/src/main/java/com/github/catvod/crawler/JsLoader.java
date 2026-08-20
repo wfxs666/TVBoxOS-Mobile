@@ -46,6 +46,11 @@ public class JsLoader {
         recentKey = "";
     }
 
+    // MBox UI 兼容：清空所有已加载的 JS 爬虫
+    public static void load() {
+        new JsLoader().clear();
+    }
+
     public static void stopAll() {
         for (Spider spider : spiders.values()){
             spider.cancelByTag();

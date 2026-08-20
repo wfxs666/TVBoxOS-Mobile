@@ -236,6 +236,28 @@ public class TxtSubscribe {
         return group;
     }
 
+public static JsonArray live2JsonArray(LinkedHashMap<String, LinkedHashMap<String, ArrayList<String>>> linkedHashMap) {
+        JsonArray jsonArray = new JsonArray();
+        for (Map.Entry<String, LinkedHashMap<String, ArrayList<String>>> groupEntry : linkedHashMap.entrySet()) {
+            JsonObject groupObj = new JsonObject();
+            groupObj.addProperty("group", groupEntry.getKey());
+            JsonArray channels = new JsonArray();
+            for (Map.Entry<String, ArrayList<String>> channelEntry : groupEntry.getValue().entrySet()) {
+                JsonObject ch = new JsonObject();
+                ch.addProperty("name", channelEntry.getKey());
+                JsonArray urls = new JsonArray();
+                for (String url : channelEntry.getValue()) {
+                    urls.add(url);
+                }
+                ch.add("urls", urls);
+                channels.add(ch);
+            }
+            groupObj.add("channels", channels);
+            jsonArray.add(groupObj);
+        }
+        return jsonArray;
+    }
+
     public static String normalizeGroupName(String name) {
         if (name == null) return DEFAULT_GROUP_NAME;
         name = name.trim();

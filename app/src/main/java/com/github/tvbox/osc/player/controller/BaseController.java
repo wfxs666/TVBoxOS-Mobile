@@ -30,10 +30,11 @@ import xyz.doikki.videoplayer.util.PlayerUtils;
 public abstract class BaseController extends BaseVideoController implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener, View.OnTouchListener {
     private GestureDetector mGestureDetector;
     private AudioManager mAudioManager;
+    private View mPauseRoot;
     private boolean mIsGestureEnabled = true;
     private int mStreamVolume;
     private float mBrightness;
-    private int mSeekPosition;
+    private int mSeekPosition = -1;
     private boolean mFirstTouch;
     private boolean mChangePosition;
     private boolean mChangeBrightness;
@@ -91,9 +92,7 @@ public abstract class BaseController extends BaseVideoController implements Gest
     }
 
     private TextView mSlideInfo;
-    private ProgressBar mLoading;
-    private ViewGroup mPauseRoot;
-    private TextView mPauseTime;
+    private View mLoading;
 
     @Override
     protected void initView() {
@@ -103,14 +102,11 @@ public abstract class BaseController extends BaseVideoController implements Gest
         setOnTouchListener(this);
         mSlideInfo = findViewWithTag("vod_control_slide_info");
         mLoading = findViewWithTag("vod_control_loading");
-        mPauseRoot = findViewWithTag("vod_control_pause");
-        mPauseTime = findViewWithTag("vod_control_pause_t");
     }
 
     @Override
     protected void setProgress(int duration, int position) {
         super.setProgress(duration, position);
-        mPauseTime.setText(PlayerUtils.stringForTime(position) + " / " + PlayerUtils.stringForTime(duration));
     }
 
     @Override
@@ -118,31 +114,28 @@ public abstract class BaseController extends BaseVideoController implements Gest
         super.onPlayStateChanged(playState);
         switch (playState) {
             case VideoView.STATE_IDLE:
-                mPauseRoot.setVisibility(GONE);
+                if (mPauseRoot != null) mPauseRoot.setVisibility(GONE);
                 mLoading.setVisibility(GONE);
                 break;
             case VideoView.STATE_PLAYING:
-                mPauseRoot.setVisibility(GONE);
                 mLoading.setVisibility(GONE);
                 break;
             case VideoView.STATE_PAUSED:
-                mPauseRoot.setVisibility(VISIBLE);
                 mLoading.setVisibility(GONE);
                 break;
             case VideoView.STATE_PREPARED:
             case VideoView.STATE_ERROR:
             case VideoView.STATE_BUFFERED:
-                mPauseRoot.setVisibility(GONE);
+                if (mPauseRoot != null) mPauseRoot.setVisibility(GONE);
                 mLoading.setVisibility(GONE);
                 break;
             case VideoView.STATE_PREPARING:
             case VideoView.STATE_BUFFERING:
-                mPauseRoot.setVisibility(GONE);
+                if (mPauseRoot != null) mPauseRoot.setVisibility(GONE);
                 mLoading.setVisibility(VISIBLE);
                 break;
             case VideoView.STATE_PLAYBACK_COMPLETED:
                 mLoading.setVisibility(GONE);
-                mPauseRoot.setVisibility(GONE);
                 break;
         }
     }
@@ -390,14 +383,14 @@ public abstract class BaseController extends BaseVideoController implements Gest
             switch (action) {
                 case MotionEvent.ACTION_UP:
                     stopSlide();
-                    if (mSeekPosition > 0) {
+                    if (mSeekPosition >= 0) {
                         mControlWrapper.seekTo(mSeekPosition);
-                        mSeekPosition = 0;
+                        mSeekPosition = -1;
                     }
                     break;
                 case MotionEvent.ACTION_CANCEL:
                     stopSlide();
-                    mSeekPosition = 0;
+                    mSeekPosition = -1;
                     break;
             }
         }

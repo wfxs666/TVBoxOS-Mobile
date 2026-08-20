@@ -1,5 +1,9 @@
-rootProject.name = "TVBox"
+rootProject.name = "TVBoxMobile"
 include ':app'
 include ':player'
 include ':quickjs'
-include ':pyramid'
+include ':TabLayout'
+include ':ViewPager1Delegate'
+include ':crash'
+include ':dlna-dmc'
+include ':dlna-core'

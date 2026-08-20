@@ -16,7 +16,7 @@ public class FastListAdapter extends BaseQuickAdapter<String, BaseViewHolder> {
     private String selectedName = "\u5168\u90e8";
 
     public FastListAdapter() {
-        super(R.layout.item_search_word_hot, new ArrayList<>());
+        super(R.layout.item_search_site, new ArrayList<>());
     }
 
     @Override

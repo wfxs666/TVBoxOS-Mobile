@@ -6,6 +6,7 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 
+import com.blankj.utilcode.util.LogUtils;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.bean.Movie;
@@ -28,10 +29,11 @@ public class QuickSearchDialog extends BaseDialog {
     private QuickSearchAdapter searchAdapter;
     private TvRecyclerView mGridView;
     private TvRecyclerView mGridViewWord;
+    List<Movie.Video> results = new ArrayList<>();
 
     public QuickSearchDialog(@NonNull @NotNull Context context) {
         super(context, R.style.CustomDialogStyleDim);
-        setCanceledOnTouchOutside(false);
+        setCanceledOnTouchOutside(true);
         setCancelable(true);
         setContentView(R.layout.dialog_quick_search);
         init(context);
@@ -42,7 +44,8 @@ public class QuickSearchDialog extends BaseDialog {
         if (event.type == RefreshEvent.TYPE_QUICK_SEARCH) {
             if (event.obj != null) {
                 List<Movie.Video> data = (List<Movie.Video>) event.obj;
-                searchAdapter.addData(data);
+                results.addAll(data);
+                searchAdapter.notifyDataSetChanged();
             }
         } else if (event.type == RefreshEvent.TYPE_QUICK_SEARCH_WORD) {
             if (event.obj != null) {
@@ -54,7 +57,7 @@ public class QuickSearchDialog extends BaseDialog {
 
     private void init(Context context) {
         EventBus.getDefault().register(this);
-        setOnDismissListener(new DialogInterface.OnDismissListener() {
+        setOnDismissListener(new OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {
                 EventBus.getDefault().unregister(this);
@@ -76,7 +79,8 @@ public class QuickSearchDialog extends BaseDialog {
                 dismiss();
             }
         });
-        searchAdapter.setNewData(new ArrayList<>());
+
+        searchAdapter.setNewData(results);
         searchWordAdapter = new SearchWordAdapter();
         mGridViewWord = findViewById(R.id.mGridViewWord);
         mGridViewWord.setAdapter(searchWordAdapter);

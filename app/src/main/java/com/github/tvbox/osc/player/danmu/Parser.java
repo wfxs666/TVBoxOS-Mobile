@@ -8,7 +8,7 @@ import com.github.tvbox.osc.util.DanmuHelper;
 import com.github.tvbox.osc.util.FileUtils;
 import com.github.tvbox.osc.util.LOG;
 import com.github.tvbox.osc.util.OkGoHelper;
-import com.github.tvbox.osc.util.SSL.SSLSocketFactoryCompat;
+import com.github.catvod.net.SSLCompat;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -167,7 +167,7 @@ public class Parser extends BaseDanmakuParser {
         builder.connectTimeout(HTTP_TIMEOUT_MS, TimeUnit.MILLISECONDS);
         builder.retryOnConnectionFailure(true);
         if (unsafeSsl) {
-            SSLSocketFactory sslSocketFactory = new SSLSocketFactoryCompat(TRUST_ALL_CERT);
+            SSLSocketFactory sslSocketFactory = new SSLCompat();
             builder.sslSocketFactory(sslSocketFactory, TRUST_ALL_CERT);
             builder.hostnameVerifier(TRUST_ALL_HOSTNAME);
         }

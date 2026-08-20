@@ -197,7 +197,7 @@ public class RemoteServer extends NanoHTTPD {
                     return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, NanoHTTPD.MIME_PLAINTEXT, "ok");    
                 } else if (fileName.equals("/action")) {
                     return handleAction(session.getParms());
-                }  else if (fileName.startsWith("/proxyM3u8")) {
+                }  else if (fileName.startsWith("/proxyM3u8") || fileName.equals("/m3u8")) {
 //                    com.github.tvbox.osc.util.LOG.i("echo-proxyM3u8 length:" + (m3u8Content == null ? 0 : m3u8Content.length()));
                     return NanoHTTPD.newFixedLengthResponse(Response.Status.OK, "application/vnd.apple.mpegurl", m3u8Content == null ? "" : m3u8Content);
                 }

@@ -11,20 +11,17 @@
     <!-- 缓冲进度 -->
     <item android:id="@android:id/secondaryProgress">
         <clip>
-            <shape android:shape="rectangle">
-                <solid android:color="#66FFFFFF" />
-                <corners android:radius="2dp"/>
-                <size android:height="3dp"/>
+            <shape>
+                <solid android:color="@color/light_gray_color" />
             </shape>
         </clip>
     </item>
     <!-- 当前进度 -->
     <item android:id="@android:id/progress">
         <clip>
-            <shape android:shape="rectangle">
-                <solid android:color="#FF4081" />
-                <corners android:radius="2dp"/>
-                <size android:height="3dp"/>
+            <shape>
+<!--                进度条颜色-->
+                <solid android:color="@color/white" />
             </shape>
         </clip>
     </item>

@@ -9,7 +9,10 @@ import com.chad.library.adapter.base.BaseViewHolder;
 import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.api.ApiConfig;
 import com.github.tvbox.osc.bean.Movie;
+import com.github.tvbox.osc.picasso.RoundTransformation;
 import com.github.tvbox.osc.util.ImgUtil;
+import com.github.tvbox.osc.util.MD5;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -30,7 +33,15 @@ public class FastSearchAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHol
         if (item.note != null && !item.note.isEmpty()) helper.setText(R.id.tvNote, item.note);
         ImageView ivThumb = helper.getView(R.id.ivThumb);
         if (!TextUtils.isEmpty(item.pic)) {
-            ImgUtil.load(item.pic, ivThumb, AutoSizeUtils.mm2px(mContext, 10), AutoSizeUtils.mm2px(mContext, 214), AutoSizeUtils.mm2px(mContext, 280), item.name);
+            Picasso.get()
+                    .load(item.pic)
+                    .transform(new RoundTransformation(MD5.string2MD5(item.pic + "position=" + helper.getLayoutPosition()))
+                            .centerCorp(true)
+                            .override(AutoSizeUtils.dp2px(mContext, 110), AutoSizeUtils.dp2px(mContext, 160))
+                            .roundRadius(AutoSizeUtils.dp2px(mContext, 20), RoundTransformation.RoundType.ALL))
+                    .placeholder(R.drawable.img_loading_placeholder)
+                    .error(R.drawable.img_loading_placeholder)
+                    .into(ivThumb);
         } else {
             Log.d(TAG, "empty image for item: " + item.name);
             ivThumb.setImageDrawable(ImgUtil.createTextDrawable(item.name));
