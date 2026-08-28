@@ -244,15 +244,11 @@ public class GridFragment extends BaseLazyFragment {
                         focusedView = view;
                         changeView(video.id,video.tag.equals("folder"));
                     }
-                    else if(ApiConfig.get().getSource(video.sourceKey) != null && ApiConfig.get().getSource(video.sourceKey).isQuickSearch() && Hawk.get(HawkConfig.FAST_SEARCH_MODE, false) && enableFastSearch()){
+                    else if(TextUtils.isEmpty(video.id) || video.id.startsWith("msearch:")){
                         jumpActivity(FastSearchActivity.class, bundle);
                     }else{
-                        if(TextUtils.isEmpty(video.id) || video.id.startsWith("msearch:")){
-                            jumpActivity(FastSearchActivity.class, bundle);
-//                            jumpActivity(SearchActivity.class, bundle);
-                        }else {
-                            changeView(video.id,false);
-                        }
+                        // MBox 手机版：点击影片直接进入详情页（快速搜索保留在长按菜单）
+                        jumpActivity(DetailActivity.class, bundle);
                     }
 
                 }
