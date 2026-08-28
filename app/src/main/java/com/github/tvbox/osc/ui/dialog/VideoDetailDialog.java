@@ -53,12 +53,38 @@ public class VideoDetailDialog extends BottomPopupView {
         DialogVideoDetailBinding binding = DialogVideoDetailBinding.bind(getPopupImplView());
 
         binding.tvName.setText(mVideo.name);
-        binding.tvYear.setText("年份："+(mVideo.year == 0 ? "" : String.valueOf(mVideo.year)));
-        binding.tvArea.setText("地区："+getText(mVideo.area));
-        binding.tvType.setText("类型："+getText(mVideo.type));
-        binding.tvActor.setText("演员："+getText(mVideo.actor));
-        binding.tvDirector.setText("导演："+getText(mVideo.director));
-        binding.tvDes.setContent("简介："+removeHtmlTag(mVideo.des));
+        // 无数据字段隐藏对应行（部分源详情缺少年份/地区等字段）
+        if (mVideo.year > 0) {
+            binding.tvYear.setText("年份：" + mVideo.year);
+        } else {
+            binding.tvYear.setVisibility(View.GONE);
+        }
+        if (!TextUtils.isEmpty(mVideo.area)) {
+            binding.tvArea.setText("地区：" + mVideo.area);
+        } else {
+            binding.tvArea.setVisibility(View.GONE);
+        }
+        if (!TextUtils.isEmpty(mVideo.type)) {
+            binding.tvType.setText("类型：" + mVideo.type);
+        } else {
+            binding.tvType.setVisibility(View.GONE);
+        }
+        if (!TextUtils.isEmpty(mVideo.actor)) {
+            binding.tvActor.setText("演员：" + mVideo.actor);
+        } else {
+            binding.tvActor.setVisibility(View.GONE);
+        }
+        if (!TextUtils.isEmpty(mVideo.director)) {
+            binding.tvDirector.setText("导演：" + mVideo.director);
+        } else {
+            binding.tvDirector.setVisibility(View.GONE);
+        }
+        String detailDes = removeHtmlTag(mVideo.des);
+        if (!TextUtils.isEmpty(detailDes)) {
+            binding.tvDes.setContent("简介：" + detailDes);
+        } else {
+            binding.tvDes.setVisibility(View.GONE);
+        }
         binding.url.setText(mActivity.getCurrentVodUrl());
         binding.tvLinkCopy.setOnClickListener(view -> {
             ClipboardUtils.copyText(mActivity.getCurrentVodUrl());
