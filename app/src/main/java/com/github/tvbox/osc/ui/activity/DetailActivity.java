@@ -637,8 +637,12 @@ public class DetailActivity extends BaseVbActivity<ActivityDetailBinding> {
         hadQuickStart = true;
         OkGo.getInstance().cancelTag("quick_search");
         quickSearchWord.clear();
-        searchTitle = mVideo.name;
+        searchTitle = TextUtils.isEmpty(mVideo.name) ? "" : mVideo.name;
         quickSearchData.clear();
+        // 部分源不返回 vod_name，跳过快速搜索避免 NPE 与无效请求
+        if (TextUtils.isEmpty(searchTitle)) {
+            return;
+        }
         quickSearchWord.addAll(SearchHelper.splitWords(searchTitle));
         // 分词
         OkGo.<String>get("http://api.pullword.com/get.php?source=" + URLEncoder.encode(searchTitle) + "&param1=0&param2=0&json=1")

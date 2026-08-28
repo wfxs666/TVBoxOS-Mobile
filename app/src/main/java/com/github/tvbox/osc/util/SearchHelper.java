@@ -79,6 +79,9 @@ public class SearchHelper {
 
     public static List<String> splitWords(String text) {
         List<String> result = new ArrayList<>();
+        if (text == null || text.isEmpty()) {
+            return result;
+        }
         result.add(text);
         String[] parts = text.split("\\W+");
         if (parts.length > 1) {
