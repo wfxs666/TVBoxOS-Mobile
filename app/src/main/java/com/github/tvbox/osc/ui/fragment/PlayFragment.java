@@ -1238,7 +1238,8 @@ public class PlayFragment extends BaseLazyFragment {
         VodInfo.VodSeries vs = mVodInfo.seriesMap.get(mVodInfo.playFlag).get(mVodInfo.playIndex);
         EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_REFRESH, mVodInfo.playIndex));
         EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_REFRESH_NOTIFY, mVodInfo.name + "&&" + vs.name));
-        String playTitleInfo = mVodInfo.name + " " + vs.name;
+        // 部分源详情未返回 vod_name 时避免显示 "null"
+String playTitleInfo = TextUtils.isEmpty(mVodInfo.name) ? vs.name : mVodInfo.name + " " + vs.name;
         setTip("正在获取播放信息", true, false);
         mController.setTitle(playTitleInfo);
 
