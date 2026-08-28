@@ -480,7 +480,8 @@ public class DetailActivity extends BaseVbActivity<ActivityDetailBinding> {
                     vodInfo.setVideo(mVideo);
                     vodInfo.sourceKey = mVideo.sourceKey;
 
-                    mBinding.tvName.setText(TextUtils.isEmpty(mVideo.name) ? "暂无信息" : mVideo.name);
+                    String fallbackTitle = getIntent().getStringExtra("title");
+            mBinding.tvName.setText(TextUtils.isEmpty(mVideo.name) ? (TextUtils.isEmpty(fallbackTitle) ? "暂无信息" : fallbackTitle) : mVideo.name);
                     String srcName = ApiConfig.get().getSource(mVideo.sourceKey).getName();
                     mBinding.tvSite.setText("来源：" + (TextUtils.isEmpty(srcName) ? "未知" : srcName));
 
