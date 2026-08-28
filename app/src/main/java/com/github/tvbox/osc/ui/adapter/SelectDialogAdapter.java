@@ -55,6 +55,12 @@ public class SelectDialogAdapter<T> extends ListAdapter<T, SelectDialogAdapter.S
 
     private int select = 0;
 
+    private boolean allowClickSelected = false;
+
+    public void setAllowClickSelected(boolean allow) {
+        this.allowClickSelected = allow;
+    }
+
     private SelectDialogInterface dialogInterface;
 
     public SelectDialogAdapter(SelectDialogInterface dialogInterface, DiffUtil.ItemCallback diffCallback) {
@@ -87,7 +93,7 @@ public class SelectDialogAdapter<T> extends ListAdapter<T, SelectDialogAdapter.S
         view.setChecked(position == select);
         view.setText(dialogInterface.getDisplay(value));
         holder.itemView.setOnClickListener(v -> {
-            if (position == select)
+            if (!allowClickSelected && position == select)
                 return;
             notifyItemChanged(select);
             select = position;

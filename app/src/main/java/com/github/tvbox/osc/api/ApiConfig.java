@@ -1677,6 +1677,8 @@ public class ApiConfig {
 
         void error(String msg);
         void notice(String msg);
+        default void retry() {
+        }
     }
 
     public interface FastParseCallback {

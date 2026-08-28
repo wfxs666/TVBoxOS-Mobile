@@ -1,6 +1,7 @@
 package com.github.tvbox.osc.ui.activity
 
 import android.content.DialogInterface
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -29,6 +30,7 @@ import com.hjq.permissions.Permission
 import com.hjq.permissions.XXPermissions
 import com.lxj.xpopup.XPopup
 import com.orhanobut.hawk.Hawk
+import java.io.FileOutputStream
 import okhttp3.HttpUrl
 import tv.danmaku.ijk.media.player.IjkMediaPlayer
 import java.io.File
@@ -413,6 +415,47 @@ class SettingActivity : BaseVbActivity<ActivitySettingBinding>() {
             dialog.show()
         })
 
+        val bgImage = Hawk.get(HawkConfig.BG_IMAGE, "")
+        mBinding.tvBgImage.text = if (bgImage.isNullOrEmpty()) "默认" else "自定义"
+        mBinding.llBgImage.setOnClickListener { view: View? ->
+            FastClickCheckUtil.check(view)
+            val types = ArrayList<Int>()
+            types.add(0)
+            types.add(1)
+            val dialog = SelectDialog<Int>(this@SettingActivity)
+            dialog.setTip("背景图片")
+            dialog.setAllowClickSelected(true)
+            dialog.setAdapter(object : SelectDialogInterface<Int?> {
+                override fun click(value: Int?, pos: Int) {
+                    when (value ?: 0) {
+                        0 -> {
+                            val intent = Intent(Intent.ACTION_GET_CONTENT)
+                            intent.type = "image/*"
+                            startActivityForResult(intent, REQ_CODE_BG)
+                        }
+                        1 -> {
+                            Hawk.put(HawkConfig.BG_IMAGE, "")
+                            mBinding.tvBgImage.text = "默认"
+                            ToastUtils.showShort("已清除背景图片")
+                        }
+                    }
+                }
+
+                override fun getDisplay(value: Int?): String {
+                    return if (value == 1) "清除背景" else "从相册选择"
+                }
+            }, object : DiffUtil.ItemCallback<Int>() {
+                override fun areItemsTheSame(oldItem: Int, newItem: Int): Boolean {
+                    return oldItem == newItem
+                }
+
+                override fun areContentsTheSame(oldItem: Int, newItem: Int): Boolean {
+                    return oldItem == newItem
+                }
+            }, types, 0)
+            dialog.show()
+        }
+
         mBinding.switchVideoPurify.setChecked(Hawk.get(HawkConfig.VIDEO_PURIFY, true))
         // toggle purify video -------------------------------------
         mBinding.llVideoPurify.setOnClickListener { v: View? ->
@@ -471,5 +514,30 @@ class SettingActivity : BaseVbActivity<ActivitySettingBinding>() {
             1 -> "站点推荐"
             else -> "关闭"
         }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQ_CODE_BG && resultCode == RESULT_OK && data?.data != null) {
+            try {
+                val uri = data.data!!
+                val dst = File(filesDir, "bg_image.jpg")
+                contentResolver.openInputStream(uri)?.use { input ->
+                    FileOutputStream(dst).use { out -> input.copyTo(out) }
+                }
+                if (dst.exists()) {
+                    Hawk.put(HawkConfig.BG_IMAGE, dst.absolutePath)
+                    mBinding.tvBgImage.text = "自定义"
+                    ToastUtils.showShort("背景图片已设置,重新打开主页生效")
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                ToastUtils.showShort("设置背景图片失败")
+            }
+        }
+    }
+
+    companion object {
+        private const val REQ_CODE_BG = 101
     }
 }

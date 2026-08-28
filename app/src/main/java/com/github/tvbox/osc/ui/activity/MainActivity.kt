@@ -2,17 +2,22 @@ package com.github.tvbox.osc.ui.activity
 
 import android.os.Process
 import android.view.MenuItem
+import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.ViewPager.SimpleOnPageChangeListener
 import com.blankj.utilcode.util.ActivityUtils
 import com.blankj.utilcode.util.ToastUtils
+import com.bumptech.glide.Glide
 import com.github.tvbox.osc.base.BaseVbActivity
 import com.github.tvbox.osc.constant.IntentKey
 import com.github.tvbox.osc.databinding.ActivityMainBinding
 import com.github.tvbox.osc.ui.fragment.GridFragment
 import com.github.tvbox.osc.ui.fragment.HomeFragment
 import com.github.tvbox.osc.ui.fragment.MyFragment
+import com.github.tvbox.osc.util.HawkConfig
+import com.orhanobut.hawk.Hawk
+import java.io.File
 import kotlin.system.exitProcess
 
 class MainActivity : BaseVbActivity<ActivityMainBinding>() {
@@ -44,6 +49,18 @@ class MainActivity : BaseVbActivity<ActivityMainBinding>() {
                 mBinding.bottomNav.menu.getItem(position).setChecked(true)
             }
         })
+
+        applyBgImage()
+    }
+
+    private fun applyBgImage() {
+        val bg = Hawk.get(HawkConfig.BG_IMAGE, "")
+        if (bg.isNullOrEmpty() || !File(bg).exists()) {
+            mBinding.ivBg.visibility = View.GONE
+            return
+        }
+        mBinding.ivBg.visibility = View.VISIBLE
+        Glide.with(this).load(File(bg)).centerCrop().into(mBinding.ivBg)
     }
 
     override fun onBackPressed() {

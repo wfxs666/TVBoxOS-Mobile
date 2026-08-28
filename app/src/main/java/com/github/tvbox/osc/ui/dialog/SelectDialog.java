@@ -25,6 +25,12 @@ import java.util.List;
 
 public class SelectDialog<T> extends BaseDialog {
 
+    private boolean allowClickSelected = false;
+
+    public void setAllowClickSelected(boolean allowClickSelected) {
+        this.allowClickSelected = allowClickSelected;
+    }
+
     public SelectDialog(@NonNull @NotNull Context context) {
         super(context);
         setContentView(R.layout.dialog_select);
@@ -57,6 +63,7 @@ public class SelectDialog<T> extends BaseDialog {
                            List<T> data, int select) {
         final int selectIdx = select;
         SelectDialogAdapter<T> adapter = new SelectDialogAdapter<>(sourceBeanSelectDialogInterface, sourceBeanItemCallback);
+        adapter.setAllowClickSelected(allowClickSelected);
         adapter.setData(data, select);
         TvRecyclerView tvRecyclerView = findViewById(R.id.list);
         tvRecyclerView.setAdapter(adapter);

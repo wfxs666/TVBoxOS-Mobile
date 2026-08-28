@@ -63,6 +63,10 @@ public class HawkConfig {
      */
     public static final String THEME_TAG = "theme_tag";
     /**
+     * 自定义背景图片路径/URL,空为默认
+     */
+    public static final String BG_IMAGE = "bg_image";
+    /**
      * 后台播放模式 0 关闭,1 开启,2 画中画
      */
     public static final String BACKGROUND_PLAY_TYPE = "background_play_type";
