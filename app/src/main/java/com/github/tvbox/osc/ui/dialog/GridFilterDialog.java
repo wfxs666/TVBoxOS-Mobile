@@ -38,6 +38,8 @@ public class GridFilterDialog extends BaseDialog {
         setContentView(R.layout.dialog_grid_filter);
         filterRoot = findViewById(R.id.filterRoot);
         findViewById(R.id.btn_reset).setOnClickListener(view -> {
+            // 数据源未加载完成时点击重置: 空值保护
+            if (mSortData == null) return;
             mSortData.filterSelect = new HashMap<>();
             selectChange = true;
             setData(mSortData);
@@ -79,6 +81,9 @@ public class GridFilterDialog extends BaseDialog {
                 @Override
                 public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
                     selectChange = true;
+                    if (sortData.filterSelect == null) {
+                        sortData.filterSelect = new HashMap<>();
+                    }
                     String filterSelect = sortData.filterSelect.get(key);
                     if (filterSelect == null || !filterSelect.equals(keys.get(position))) {// 没选 或 不是重选
                         sortData.filterSelect.put(key, keys.get(position));

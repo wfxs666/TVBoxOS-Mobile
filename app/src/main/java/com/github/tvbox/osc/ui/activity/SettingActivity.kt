@@ -560,9 +560,10 @@ class SettingActivity : BaseVbActivity<ActivitySettingBinding>() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQ_CODE_BG && resultCode == RESULT_OK && data?.data != null) {
+        if (requestCode == REQ_CODE_BG && resultCode == RESULT_OK && (data?.data != null || data?.clipData != null)) {
             try {
-                val uri = data.data!!
+                // 部分系统相册在clipData中返回URI
+                val uri = (data?.data ?: data?.clipData?.getItemAt(0)?.uri)!!
                 val dst = File(filesDir, "bg_image.jpg")
                 contentResolver.openInputStream(uri)?.use { input ->
                     FileOutputStream(dst).use { out -> input.copyTo(out) }
@@ -571,6 +572,7 @@ class SettingActivity : BaseVbActivity<ActivitySettingBinding>() {
                     Hawk.put(HawkConfig.BG_IMAGE, dst.absolutePath)
                     mBinding.tvBgImage.text = "自定义"
                     ToastUtils.showShort("背景图片已设置,重新打开主页生效")
+                    applySettingGlass()
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -689,8 +691,7 @@ class SettingActivity : BaseVbActivity<ActivitySettingBinding>() {
         if (glass && !bg.isNullOrEmpty() && File(bg).exists()) {
             mBinding.ivBg.visibility = View.VISIBLE
             mBinding.ivBg.setImageAlpha(Hawk.get(HawkConfig.BG_IMAGE_ALPHA, 255))
-            Glide.with(this).load(File(bg)).centerCrop().into(mBinding.ivBg)
-            Utils.applyBlur(mBinding.ivBg, 28f)
+            Utils.loadBlurBg(this, mBinding.ivBg, File(bg))
             // 卡片半透明玻璃(保留圆角)
             val glassCard = android.graphics.drawable.GradientDrawable().apply {
                 shape = android.graphics.drawable.GradientDrawable.RECTANGLE

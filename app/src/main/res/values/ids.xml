@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- View tag: 主题卡片背景已处理(避免反复setColor引发闪屏重绘) -->
+    <item name="tag_themed" type="id" />
+</resources>

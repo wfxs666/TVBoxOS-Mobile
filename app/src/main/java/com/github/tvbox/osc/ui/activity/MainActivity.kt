@@ -67,23 +67,29 @@ class MainActivity : BaseVbActivity<ActivityMainBinding>() {
         applyGlassMenu()
     }
 
+    private var lastBgPath: String? = null
+
     private fun applyBgImage() {
         val bg = Hawk.get(HawkConfig.BG_IMAGE, "")
         if (bg.isNullOrEmpty() || !File(bg).exists()) {
+            lastBgPath = null
             mBinding.ivBg.visibility = View.GONE
             return
         }
+        // 路径未变且已显示: 不重载, 避免onResume反复解码造成闪烁
+        if (lastBgPath == bg && mBinding.ivBg.visibility == View.VISIBLE) return
+        lastBgPath = bg
         mBinding.ivBg.visibility = View.VISIBLE
         // 背景图片透明度 0-255
         mBinding.ivBg.setImageAlpha(Hawk.get(HawkConfig.BG_IMAGE_ALPHA, 255))
         mBinding.ivBg.alpha = 1f
-        Glide.with(this).load(File(bg)).centerCrop().into(mBinding.ivBg)
-        // 应用本身高斯模糊(API31+)
+        val bgFile = File(bg)
         if (Hawk.get(HawkConfig.GLASS_APP, false)) {
-            Utils.applyBlur(mBinding.ivBg, 28f)
+            Utils.loadBlurBg(this, mBinding.ivBg, bgFile)
         } else {
-            Utils.applyBlur(mBinding.ivBg, 0f)
+            Utils.loadBg(this, mBinding.ivBg, bgFile)
         }
+        // 应用本身高斯模糊(API31+)
     }
 
     /** 底部导航图标/文字选中色跟随主题色, 背景同时换主题浅色调 */
@@ -127,6 +133,12 @@ class MainActivity : BaseVbActivity<ActivityMainBinding>() {
     private fun applyContentPadding() {
         if (mBinding.vp.paddingBottom != 48) {
             mBinding.vp.setPadding(0, 0, 0, 48)
+        // 硬件层缓存: 半透明底层滚动/切换时不闪烁
+        try {
+            mBinding.vp.setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
+            mBinding.bottomNav.setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
+        } catch (e: Exception) {
+        }
         }
     }
 

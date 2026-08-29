@@ -101,14 +101,43 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomAd
             int pageBg = Utils.isGlassOn() ? Utils.getGlassPageBg() : Utils.getThemePageBg();
             // 玻璃模式下主题色未设置也执行: 白底->半透明白, 透出背景图
             if (tc != -1 || Utils.isGlassOn()) {
-                getWindow().getDecorView().setBackgroundColor(pageBg);
+                // decor背景不透明化(窗口级alpha会引发滚动闪屏), 玻璃感由背景图+卡片层负责
+                getWindow().getDecorView().setBackgroundColor((pageBg & 0x00FFFFFF) | 0xFF000000);
                 Utils.themeCardBackgrounds(getWindow().getDecorView());
             }
             if (tc != -1) {
                 // 文字色/控件色在init()后立即应用, 避免先黑后变色的闪变
                 Utils.applyThemeRecursive(getWindow().getDecorView());
             }
+            // 滚动容器/动画文字设硬件层: 半透明层滚动时GPU合成残影(闪烁/拖影)的根治
+            enableHardwareLayers(getWindow().getDecorView());
         } catch (Exception e) {
+        }
+    }
+
+    /** 半透明层在滚动/动画时容易产生GPU合成残影(闪屏/拖影); 给滚动容器与固定浮层设硬件层缓存 */
+    private void enableHardwareLayers(View root) {
+        try {
+            enableHardwareLayersInner(root);
+        } catch (Exception e) {
+        }
+    }
+
+    private void enableHardwareLayersInner(android.view.View view) {
+        if (view == null) return;
+        try {
+            if (view instanceof android.widget.ScrollView || view instanceof androidx.recyclerview.widget.RecyclerView
+                    || view instanceof androidx.viewpager.widget.ViewPager
+                    || view instanceof android.widget.HorizontalScrollView) {
+                view.setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null);
+            }
+        } catch (Exception e) {
+        }
+        if (view instanceof android.view.ViewGroup) {
+            android.view.ViewGroup group = (android.view.ViewGroup) view;
+            for (int i = 0; i < group.getChildCount(); i++) {
+                enableHardwareLayersInner(group.getChildAt(i));
+            }
         }
     }
 
@@ -130,8 +159,8 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomAd
             iv.setScaleType(android.widget.ImageView.ScaleType.CENTER_CROP);
             iv.setImageAlpha(Hawk.get(HawkConfig.BG_IMAGE_ALPHA, 255));
             content.addView(iv, 0); // 最底层,不遮挡内容
-            com.bumptech.glide.Glide.with(this).load(new java.io.File(bg)).centerCrop().into(iv);
-            Utils.applyBlur(iv, 28f);
+            // 静态模糊(缩图拉伸), 不用RenderEffect, 避免滚动闪烁/拖影
+            Utils.loadBlurBg(this, iv, new java.io.File(bg));
         } catch (Exception e) {
         }
     }

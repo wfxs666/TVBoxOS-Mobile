@@ -164,7 +164,7 @@ public class Utils {
         try {
             applyThemeRecursive(root);
             themeCardBackgrounds(root);
-            // 弹窗根容器本身(玻璃模式: 半透明玻璃色,透出背景图)
+            themeShadowLayouts(root);
             int popupBg = isGlassOn() ? getGlassPopupBg() : getThemePageBg();
             android.graphics.drawable.Drawable bg = root.getBackground();
             if (bg instanceof android.graphics.drawable.GradientDrawable) {
@@ -242,13 +242,34 @@ public class Utils {
     }
 
     /** 遍历替换灰色/白色卡片背景为主题色浅色调(递归调用,保持圆角) */
-    public static void themeCardBackgrounds(android.view.View root) {
+        /** ShadowLayout: 用专用setter替换底色(玻璃模式半透明, 普通模式主题浅色) */
+    private static void themeShadowLayouts(android.view.View root) {
+        if (root == null) return;
+        try {
+            if (root instanceof com.lihang.ShadowLayout) {
+                com.lihang.ShadowLayout sl = (com.lihang.ShadowLayout) root;
+                int c = isGlassOn() ? getGlassPopupBg() : getThemePageBg();
+                sl.setLayoutBackground(c);
+            }
+        } catch (Exception e) {
+        }
+        if (root instanceof android.view.ViewGroup) {
+            android.view.ViewGroup group = (android.view.ViewGroup) root;
+            for (int i = 0; i < group.getChildCount(); i++) {
+                themeShadowLayouts(group.getChildAt(i));
+            }
+        }
+    }
+
+public static void themeCardBackgrounds(android.view.View root) {
         int pageBg = isGlassOn() ? getGlassPageBg() : getThemePageBg();
         themeCardBackgroundsInner(root, pageBg);
     }
 
     private static void themeCardBackgroundsInner(android.view.View view, int pageBg) {
         if (view == null) return;
+        // 已处理过: 跳过, 避免滚动/恢复时反复setColor引发闪屏重绘
+        if (Boolean.TRUE.equals(view.getTag(R.id.tag_themed))) return;
         try {
             android.graphics.drawable.Drawable bg = view.getBackground();
             if (bg instanceof android.graphics.drawable.GradientDrawable) {
@@ -283,6 +304,7 @@ public class Utils {
                     }
                 }
             }
+            view.setTag(R.id.tag_themed, Boolean.TRUE);
         } catch (Exception e) {
         }
         if (view instanceof android.view.ViewGroup) {
@@ -424,6 +446,48 @@ public class Utils {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * 静态模糊加载背景图: 尺寸缩小后由ImageView拉伸显示,视觉即高斯模糊。
+     * 不用RenderEffect(滚动时逐帧重算导致闪烁/拖影), 且强制跳过内存/磁盘缓存(换图立即生效)。
+     */
+    public static void loadBlurBg(android.content.Context ctx, android.widget.ImageView iv, java.io.File file) {
+        if (ctx == null || iv == null || file == null) return;
+        try {
+            com.bumptech.glide.Glide.with(ctx)
+                    .asBitmap()
+                    .load(file)
+                    .skipMemoryCache(true)
+                    .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.NONE)
+                    .dontAnimate()
+                    .into(new com.bumptech.glide.request.target.SimpleTarget<android.graphics.Bitmap>(480, 960) {
+                        @Override
+                        public void onResourceReady(@androidx.annotation.NonNull android.graphics.Bitmap resource, @androidx.annotation.Nullable com.bumptech.glide.request.transition.Transition<? super android.graphics.Bitmap> transition) {
+                            iv.setImageBitmap(resource); // 小尺寸位图拉伸显示 = 自然模糊, 无RenderEffect逐帧开销
+                        }
+
+                        @Override
+                        public void onLoadFailed(@androidx.annotation.Nullable android.graphics.drawable.Drawable errorDrawable) {
+                        }
+                    });
+        } catch (Exception e) {
+        }
+    }
+
+    /** 普通加载背景图(跳过缓存,换图立即生效) */
+    public static void loadBg(android.content.Context ctx, android.widget.ImageView iv, java.io.File file) {
+        if (ctx == null || iv == null || file == null) return;
+        try {
+            com.bumptech.glide.Glide.with(ctx)
+                    .load(file)
+                    .skipMemoryCache(true)
+                    .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.NONE)
+                    .dontAnimate()
+                    .centerCrop()
+                    .into(iv);
+        } catch (Exception e) {
         }
     }
 

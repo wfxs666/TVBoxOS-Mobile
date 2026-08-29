@@ -166,6 +166,11 @@ class HomeFragment : BaseVbFragment<FragmentHomeBinding>() {
     private fun initData() {
         val mainActivity = mActivity as MainActivity
         onlyConfigChanged = mainActivity.useCacheConfig
+        // marquee滚动文字: 硬件层缓存, 避免半透明背景下拖影
+        try {
+            mBinding.tvName.setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
+        } catch (e: Exception) {
+        }
 
         val home = ApiConfig.get().homeSourceBean
         if (home != null && !home.name.isNullOrEmpty()) {
