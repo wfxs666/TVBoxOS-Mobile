@@ -482,7 +482,7 @@ public class DetailActivity extends BaseVbActivity<ActivityDetailBinding> {
 
                     String fallbackTitle = getIntent().getStringExtra("title");
             mBinding.tvName.setText(TextUtils.isEmpty(mVideo.name) ? (TextUtils.isEmpty(fallbackTitle) ? "暂无信息" : fallbackTitle) : mVideo.name);
-                    String srcName = ApiConfig.get().getSource(mVideo.sourceKey).getName();
+                    String srcName = ApiConfig.get().getSource(mVideo.sourceKey) == null ? "" : ApiConfig.get().getSource(mVideo.sourceKey).getName();
                     mBinding.tvSite.setText("来源：" + (TextUtils.isEmpty(srcName) ? "未知" : srcName));
 
                     if (vodInfo.seriesMap != null && vodInfo.seriesMap.size() > 0) {//线路

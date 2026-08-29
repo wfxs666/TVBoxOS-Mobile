@@ -105,6 +105,12 @@ public class VideoDetailDialog extends BottomPopupView {
                         .show();
             });
         }
+        getPopupImplView().post(() -> {
+            try {
+                com.github.tvbox.osc.util.Utils.themePopupRoot(getPopupImplView());
+            } catch (Exception e) {
+            }
+        });
     }
 
     private String getText(String str){

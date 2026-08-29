@@ -4,6 +4,7 @@ import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.api.ApiConfig;
+import com.github.tvbox.osc.bean.SourceBean;
 import com.github.tvbox.osc.bean.Movie;
 
 import java.util.ArrayList;
@@ -21,11 +22,13 @@ public class QuickSearchAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHo
     @Override
     protected void convert(BaseViewHolder helper, Movie.Video item) {
         // lite
-        helper.setText(R.id.tvName, String.format("%s  %s %s %s", ApiConfig.get().getSource(item.sourceKey).getName(), item.name, item.type == null ? "" : item.type, item.note == null ? "" : item.note));
+        String sourceName = ApiConfig.get().getSource(item.sourceKey) == null ? "" : ApiConfig.get().getSource(item.sourceKey).getName();
+        helper.setText(R.id.tvName, String.format("%s  %s %s %s", sourceName, item.name, item.type == null ? "" : item.type, item.note == null ? "" : item.note));
         // with preview
         /*
         helper.setText(R.id.tvName, item.name);
-        helper.setText(R.id.tvSite, ApiConfig.get().getSource(item.sourceKey).getName());
+        SourceBean source = ApiConfig.get().getSource(item.sourceKey);
+        helper.setText(R.id.tvSite, source == null ? "" : source.getName());
         helper.setVisible(R.id.tvNote, item.note != null && !item.note.isEmpty());
         if (item.note != null && !item.note.isEmpty()) {
             helper.setText(R.id.tvNote, item.note);

@@ -67,8 +67,72 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomAd
         initStatusBar();
         initTitleBar();
         init();
+        applyPageBg();
         if (!App.getInstance().isNormalStart){
             AppUtils.relaunchApp(true);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Utils.applyTitleBarTheme(this);
+        Utils.applyThemeRecursive(getWindow().getDecorView());
+        applyPageBg();
+        // 延迟重跑一次,覆盖Fragment懒加载/动态创建的内容
+        final android.view.View decor = getWindow().getDecorView();
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Utils.applyThemeRecursive(decor);
+                    Utils.themeCardBackgrounds(decor);
+                } catch (Exception e) {
+                }
+            }
+        }, 400);
+    }
+
+    /** 自定义主题色时,将大片白底换为主题色浅色调, 并立即应用文字色(首帧即生效) */
+    private void applyPageBg() {
+        applyGlassBackdrop();
+        int tc = Utils.getThemeColor();
+        try {
+            int pageBg = Utils.isGlassOn() ? Utils.getGlassPageBg() : Utils.getThemePageBg();
+            // 玻璃模式下主题色未设置也执行: 白底->半透明白, 透出背景图
+            if (tc != -1 || Utils.isGlassOn()) {
+                getWindow().getDecorView().setBackgroundColor(pageBg);
+                Utils.themeCardBackgrounds(getWindow().getDecorView());
+            }
+            if (tc != -1) {
+                // 文字色/控件色在init()后立即应用, 避免先黑后变色的闪变
+                Utils.applyThemeRecursive(getWindow().getDecorView());
+            }
+        } catch (Exception e) {
+        }
+    }
+
+    /** 液态玻璃: 页面无背景图层时,在最底层铺模糊背景图(内容透明后即可透出) */
+    private void applyGlassBackdrop() {
+        try {
+            if (!Utils.isGlassOn()) return;
+            String bg = Hawk.get(HawkConfig.BG_IMAGE, "");
+            if (bg == null || bg.isEmpty() || !new java.io.File(bg).exists()) return;
+            ViewGroup content = getWindow().getDecorView().findViewById(android.R.id.content);
+            if (content == null) return;
+            if (content.findViewWithTag("glass_backdrop") != null) return; // 已铺
+            // 页面自带背景图(ivBg)时跳过,避免双层
+            int ivBgId = getResources().getIdentifier("ivBg", "id", getPackageName());
+            if (ivBgId != 0 && content.findViewById(ivBgId) != null) return;
+            android.widget.ImageView iv = new android.widget.ImageView(this);
+            iv.setTag("glass_backdrop");
+            iv.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            iv.setScaleType(android.widget.ImageView.ScaleType.CENTER_CROP);
+            iv.setImageAlpha(Hawk.get(HawkConfig.BG_IMAGE_ALPHA, 255));
+            content.addView(iv, 0); // 最底层,不遮挡内容
+            com.bumptech.glide.Glide.with(this).load(new java.io.File(bg)).centerCrop().into(iv);
+            Utils.applyBlur(iv, 28f);
+        } catch (Exception e) {
         }
     }
 
@@ -79,8 +143,10 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomAd
 
 
     private void initStatusBar(){
+        int tc = Utils.getThemeColor();
+        int textColor = Utils.getThemeTextColorOrDefault(tc);
         ImmersionBar.with(this)
-                .statusBarDarkFont(!Utils.isDarkTheme())
+                .statusBarDarkFont(tc == -1 || Utils.isColorLight(textColor))
                 .titleBar(findTitleBar(getWindow().getDecorView().findViewById(android.R.id.content)))
                 .navigationBarColor(R.color.white)
                 .init();

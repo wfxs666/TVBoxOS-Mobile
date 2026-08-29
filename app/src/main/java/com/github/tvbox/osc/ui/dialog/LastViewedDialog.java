@@ -34,6 +34,19 @@ public class LastViewedDialog extends PositionPopupView {
         super.onCreate();
         TextView textView = findViewById(R.id.tv);
         textView.setText("上次看到: "+vodInfo.name+" "+vodInfo.note);
+        // 跟随自定义主题色(默认蓝改为主题色)
+        int tc = com.github.tvbox.osc.util.Utils.getThemeColor();
+        if (tc != -1) {
+            try {
+                android.graphics.drawable.Drawable d = textView.getBackground();
+                if (d instanceof android.graphics.drawable.GradientDrawable) {
+                    ((android.graphics.drawable.GradientDrawable) d).setColor(tc);
+                } else {
+                    textView.setBackgroundColor(tc);
+                }
+            } catch (Exception e) {
+            }
+        }
         textView.setOnClickListener(view -> {
             FastClickCheckUtil.check(view);
             dismiss();

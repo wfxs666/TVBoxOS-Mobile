@@ -14,6 +14,7 @@ import android.view.WindowManager;
 import androidx.annotation.NonNull;
 
 import com.github.tvbox.osc.R;
+import com.github.tvbox.osc.util.Utils;
 
 import xyz.doikki.videoplayer.util.CutoutUtil;
 
@@ -40,7 +41,8 @@ public class BaseDialog extends Dialog {
         lp.copyFrom(getWindow().getAttributes());
         lp.gravity = Gravity.BOTTOM | Gravity.START | Gravity.END;
         lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
-        lp.dimAmount = 0.5f;
+        // 玻璃模式下降低遮罩,半透明弹窗可透出背景图
+        lp.dimAmount = Utils.isGlassOn() ? 0.25f : 0.5f;
         getWindow().setAttributes(lp);
         getWindow().setWindowAnimations(R.style.BottomDialogAnimation); // Set the animation style
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
@@ -53,6 +55,16 @@ public class BaseDialog extends Dialog {
         }
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
         super.show();
+        //弹出后统一应用主题色(弹窗独立Window,Activity遍历不到)
+        getWindow().getDecorView().post(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Utils.themePopupRoot(getWindow().getDecorView());
+                } catch (Exception e) {
+                }
+            }
+        });
         //hideSysBar();
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
     }

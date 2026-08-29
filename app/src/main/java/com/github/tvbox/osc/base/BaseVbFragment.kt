@@ -41,6 +41,12 @@ abstract class BaseVbFragment<T : ViewBinding> : Fragment(), CustomAdapt {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         init()
+        // Fragment 首次创建后应用主题色(卡片/文字/背景), 解决懒加载时序问题
+        try {
+            com.github.tvbox.osc.util.Utils.applyThemeRecursive(view)
+            com.github.tvbox.osc.util.Utils.themeCardBackgrounds(view)
+        } catch (e: Exception) {
+        }
     }
 
     override fun onAttach(context: Context) {

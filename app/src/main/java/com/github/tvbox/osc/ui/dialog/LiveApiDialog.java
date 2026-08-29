@@ -64,6 +64,12 @@ public class LiveApiDialog extends CenterPopupView {
             ToastUtils.showShort("设置成功");
             dismiss();
         });
+        getPopupImplView().post(() -> {
+            try {
+                com.github.tvbox.osc.util.Utils.themePopupRoot(getPopupImplView());
+            } catch (Exception e) {
+            }
+        });
     }
 
     private void updateEt(String text){

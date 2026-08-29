@@ -62,6 +62,12 @@ public class LiveSettingDialog extends BottomPopupView {
         initLiveSettingGroupList();
         loadCurrentSourceList();
         selectSettingGroup(0);
+        getPopupImplView().post(() -> {
+            try {
+                com.github.tvbox.osc.util.Utils.themePopupRoot(getPopupImplView());
+            } catch (Exception e) {
+            }
+        });
     }
 
 

@@ -23,11 +23,17 @@ public class SubsciptionDialog extends CenterPopupView {
     }
 
     private final String mDefaultName;
+    private final String mDefaultUrl;
     private OnSubsciptionListener listener;
 
     public SubsciptionDialog(@NonNull Context context, String defaultName, OnSubsciptionListener listener) {
+        this(context, defaultName, "", listener);
+    }
+
+    public SubsciptionDialog(@NonNull Context context, String defaultName, String defaultUrl, OnSubsciptionListener listener) {
         super(context);
         mDefaultName = defaultName;
+        mDefaultUrl = defaultUrl;
         this.listener = listener;
     }
 
@@ -42,6 +48,9 @@ public class SubsciptionDialog extends CenterPopupView {
         DialogInputSubsriptionBinding binding = DialogInputSubsriptionBinding.bind(getPopupImplView());
         binding.etName.setText(mDefaultName);
         binding.etName.setSelection(mDefaultName.length());
+        if (!android.text.TextUtils.isEmpty(mDefaultUrl)) {
+            binding.etUrl.setText(mDefaultUrl);
+        }
         binding.btnCancel.setOnClickListener(v -> dismiss());
         binding.btnConfirm.setOnClickListener(view -> {
             String name = binding.etName.getText().toString().trim();
@@ -62,6 +71,12 @@ public class SubsciptionDialog extends CenterPopupView {
 
         binding.tvLocal.setOnClickListener(view -> {
             dismissWith(() -> listener.chooseLocal(binding.cbCheck.isChecked()));
+        });
+        getPopupImplView().post(() -> {
+            try {
+                com.github.tvbox.osc.util.Utils.themePopupRoot(getPopupImplView());
+            } catch (Exception e) {
+            }
         });
     }
 }

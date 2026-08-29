@@ -371,6 +371,7 @@ public class LiveActivity extends BaseActivity {
            // showChannelInfo();
             return true;
         }
+        if (mVideoView == null) return false;
         mVideoView.release();
         if (!changeSource) {
             currentChannelGroupIndex = channelGroupIndex;

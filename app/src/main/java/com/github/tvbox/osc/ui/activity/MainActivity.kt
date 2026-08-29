@@ -1,5 +1,7 @@
 package com.github.tvbox.osc.ui.activity
 
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Process
 import android.view.MenuItem
 import android.view.View
@@ -16,6 +18,7 @@ import com.github.tvbox.osc.ui.fragment.GridFragment
 import com.github.tvbox.osc.ui.fragment.HomeFragment
 import com.github.tvbox.osc.ui.fragment.MyFragment
 import com.github.tvbox.osc.util.HawkConfig
+import com.github.tvbox.osc.util.Utils
 import com.orhanobut.hawk.Hawk
 import java.io.File
 import kotlin.system.exitProcess
@@ -51,6 +54,17 @@ class MainActivity : BaseVbActivity<ActivityMainBinding>() {
         })
 
         applyBgImage()
+        applyThemeColor()
+        applyGlassMenu()
+        applyContentPadding()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // 从设置页返回时刷新主题/玻璃效果
+        applyBgImage()
+        applyThemeColor()
+        applyGlassMenu()
     }
 
     private fun applyBgImage() {
@@ -60,7 +74,60 @@ class MainActivity : BaseVbActivity<ActivityMainBinding>() {
             return
         }
         mBinding.ivBg.visibility = View.VISIBLE
+        // 背景图片透明度 0-255
+        mBinding.ivBg.setImageAlpha(Hawk.get(HawkConfig.BG_IMAGE_ALPHA, 255))
+        mBinding.ivBg.alpha = 1f
         Glide.with(this).load(File(bg)).centerCrop().into(mBinding.ivBg)
+        // 应用本身高斯模糊(API31+)
+        if (Hawk.get(HawkConfig.GLASS_APP, false)) {
+            Utils.applyBlur(mBinding.ivBg, 28f)
+        } else {
+            Utils.applyBlur(mBinding.ivBg, 0f)
+        }
+    }
+
+    /** 底部导航图标/文字选中色跟随主题色, 背景同时换主题浅色调 */
+    private fun applyThemeColor() {
+        val tc = Utils.getThemeColor()
+        if (tc != -1) {
+            val unchecked = if (Utils.isColorLight(tc)) 0xFFB3B3B3.toInt() else 0xFF777777.toInt()
+            val csl = ColorStateList(
+                arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
+                intArrayOf(tc, unchecked)
+            )
+            mBinding.bottomNav.itemIconTintList = csl
+            mBinding.bottomNav.itemTextColor = csl
+            if (!Hawk.get(HawkConfig.GLASS_MENU, false)) {
+                // 非玻璃模式: 白底换主题浅色调,与卡片一致
+                mBinding.bottomNav.setBackgroundColor(Utils.getThemePageBg())
+            }
+        } else {
+            mBinding.bottomNav.itemIconTintList = null
+            mBinding.bottomNav.itemTextColor = null
+            if (!Hawk.get(HawkConfig.GLASS_MENU, false)) {
+                mBinding.bottomNav.setBackgroundColor(Color.WHITE)
+            }
+        }
+    }
+
+    /** 菜单栏液态玻璃: 半透明背景浮在内容上, 滚动内容从下面穿过 */
+    private fun applyGlassMenu() {
+        val glass = Hawk.get(HawkConfig.GLASS_MENU, false)
+        if (glass) {
+            mBinding.bottomNav.background = null
+            // 深色模式: 深色玻璃; 浅色模式: 半透明白
+            val navGlass = if (Utils.isDarkTheme()) 0x66292B33.toInt() else 0x66FFFFFF.toInt()
+            mBinding.bottomNav.setBackgroundColor(navGlass)
+        } else {
+            mBinding.bottomNav.setBackgroundColor(Utils.getThemePageBg())
+        }
+    }
+
+    /** 内容始终避开底部导航48dp(玻璃开启时导航半透明浮于其上) */
+    private fun applyContentPadding() {
+        if (mBinding.vp.paddingBottom != 48) {
+            mBinding.vp.setPadding(0, 0, 0, 48)
+        }
     }
 
     override fun onBackPressed() {

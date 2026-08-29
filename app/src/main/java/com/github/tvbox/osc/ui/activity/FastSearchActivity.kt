@@ -36,6 +36,7 @@ import com.github.tvbox.osc.ui.dialog.SearchSuggestionsDialog
 import com.github.tvbox.osc.util.FastClickCheckUtil
 import com.github.tvbox.osc.util.HawkConfig
 import com.github.tvbox.osc.util.SearchHelper
+import com.github.tvbox.osc.util.Utils
 import com.github.tvbox.osc.viewmodel.SourceViewModel
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
@@ -114,11 +115,14 @@ class FastSearchActivity : BaseVbActivity<ActivityFastSearchBinding>(), TextWatc
             search(mBinding.etSearch.text.toString())
         }
         mBinding.tabLayout.configTabLayoutConfig {
+            tabSelectColor = android.graphics.Color.WHITE
+            tabDeselectColor = 0xFF999999.toInt()
             onSelectViewChange  = { _, selectViewList, _, _ ->
                     val tvItem: TextView = selectViewList.first() as TextView
                     filterResult(tvItem.text.toString())
                 }
         }
+        mBinding.tabLayout.tabIndicator.indicatorColor = Utils.getThemeColor().let { if (it != -1) it else this@FastSearchActivity.getColor(R.color.colorPrimary) }
         mBinding.mGridView.setHasFixedSize(true)
         mBinding.mGridView.setLayoutManager(LinearLayoutManager(this))
         mBinding.mGridView.adapter = searchAdapter

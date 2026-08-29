@@ -76,6 +76,12 @@ public abstract class BaseLazyFragment extends Fragment implements CustomAdapt {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        // Fragment 首次创建后应用主题色(卡片/文字/背景), 解决懒加载时序问题
+        try {
+            com.github.tvbox.osc.util.Utils.applyThemeRecursive(view);
+            com.github.tvbox.osc.util.Utils.themeCardBackgrounds(view);
+        } catch (Exception e) {
+        }
         if (!isHidden() && getUserVisibleHint()) {
             // 可见状态,进行事件分发
             dispatchUserVisibleHint(true);

@@ -33,6 +33,20 @@ public class SubscriptionAdapter extends BaseQuickAdapter<Subscription, BaseView
         .setVisible(R.id.iv_pushpin,item.isTop());
 
         helper.addOnClickListener(R.id.iv_del);
+
+        // 订阅页文字: 绑定即应用自定义文字色, 避免先黑后变色的闪变
+        try {
+            int customText = com.github.tvbox.osc.util.Utils.getThemeTextColor();
+            int tc = com.github.tvbox.osc.util.Utils.getThemeColor();
+            if (customText != -1) {
+                helper.setTextColor(R.id.tv_name, customText);
+                helper.setTextColor(R.id.tv_url, customText);
+            } else if (tc != -1) {
+                helper.setTextColor(R.id.tv_name, tc);
+                helper.setTextColor(R.id.tv_url, tc);
+            }
+        } catch (Exception e) {
+        }
     }
 
     /**

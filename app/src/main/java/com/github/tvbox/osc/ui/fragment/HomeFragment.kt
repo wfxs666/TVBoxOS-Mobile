@@ -39,6 +39,7 @@ import com.github.tvbox.osc.ui.dialog.SelectDialog
 import com.github.tvbox.osc.ui.dialog.TipDialog
 import com.github.tvbox.osc.util.DefaultConfig
 import com.github.tvbox.osc.util.HawkConfig
+import com.github.tvbox.osc.util.Utils
 import com.github.tvbox.osc.viewmodel.SourceViewModel
 import com.lxj.xpopup.XPopup
 import com.orhanobut.hawk.Hawk
@@ -81,7 +82,43 @@ class HomeFragment : BaseVbFragment<FragmentHomeBinding>() {
      */
     var onlyConfigChanged = false
 
+    private fun applyThemeColor() {
+        val themeColor = Utils.getThemeColor()
+        if (themeColor != -1) {
+            try {
+                // 顶栏背景(支持透明度,开启玻璃时半透明透出背景图)
+                mBinding.topLayout.setBackgroundColor(Utils.glassify(themeColor, 0x99))
+                // 文字/图标颜色: 优先用户自定义,否则自动对比色
+                val textColor = Utils.getThemeTextColorOrDefault(themeColor)
+                mBinding.tvName.setTextColor(textColor)
+                mBinding.tvName.setCompoundDrawableTintList(android.content.res.ColorStateList.valueOf(textColor))
+                mBinding.search.setTextColor(textColor)
+                // 搜索框提示文字/放大镜图标颜色跟随文字色
+                mBinding.search.setHintTextColor(textColor)
+                mBinding.search.setCompoundDrawableTintList(android.content.res.ColorStateList.valueOf(textColor))
+                mBinding.ivCollect.setColorFilter(textColor)
+                mBinding.ivHistory.setColorFilter(textColor)
+                // tab选中色 + 指示器颜色跟随主题色
+                mBinding.tabLayout.configTabLayoutConfig {
+                    tabSelectColor = themeColor
+                }
+                mBinding.tabLayout.tabIndicator.indicatorColor = themeColor
+            } catch (e: Exception) {
+            }
+        } else {
+            try {
+                val primary = mContext!!.getColor(com.github.tvbox.osc.R.color.colorPrimary)
+                mBinding.tabLayout.configTabLayoutConfig {
+                    tabSelectColor = primary
+                }
+                mBinding.tabLayout.tabIndicator.indicatorColor = primary
+            } catch (e: Exception) {
+            }
+        }
+    }
+
     override fun init() {
+        applyThemeColor()
         ControlManager.get().startServer()
         mBinding.nameContainer.setOnClickListener {
             if (dataInitOk && jarInitOk) {

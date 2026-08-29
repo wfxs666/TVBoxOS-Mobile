@@ -7,6 +7,7 @@ import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.api.ApiConfig;
+import com.github.tvbox.osc.bean.SourceBean;
 import com.github.tvbox.osc.bean.Movie;
 import com.github.tvbox.osc.picasso.RoundTransformation;
 import com.github.tvbox.osc.util.ImgUtil;
@@ -28,7 +29,8 @@ public class SearchAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHolder>
     @Override
     protected void convert(BaseViewHolder helper, Movie.Video item) {
         helper.setText(R.id.tvName, item.name);
-        helper.setText(R.id.tvSite, ApiConfig.get().getSource(item.sourceKey).getName());
+        SourceBean source = ApiConfig.get().getSource(item.sourceKey);
+        helper.setText(R.id.tvSite, source == null ? "" : source.getName());
         helper.setVisible(R.id.tvNote, item.note != null && !item.note.isEmpty());
         if (item.note != null && !item.note.isEmpty()) helper.setText(R.id.tvNote, item.note);
         ImageView ivThumb = helper.getView(R.id.ivThumb);

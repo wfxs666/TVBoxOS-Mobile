@@ -133,6 +133,7 @@ class SubscriptionActivity : BaseVbActivity<ActivitySubscriptionBinding>() {
                         arrayOf(
                             if (item.isTop) "取消置顶" else "置顶",
                             "重命名",
+                            "编辑",
                             "复制地址"
                         ), null
                     ) { index: Int, _: String? ->
@@ -164,6 +165,33 @@ class SubscriptionActivity : BaseVbActivity<ActivitySubscriptionBinding>() {
                                     ).show()
                             }
                             2 -> {
+                                val oldItem = mSubscriptions[position]
+                                XPopup.Builder(this@SubscriptionActivity)
+                                    .autoFocusEditText(false)
+                                    .asCustom(
+                                        SubsciptionDialog(
+                                            this@SubscriptionActivity,
+                                            oldItem.name,
+                                            oldItem.url,
+                                            object : OnSubsciptionListener {
+                                                override fun onConfirm(name: String, url: String, checked: Boolean) {
+                                                    for (s in mSubscriptions) {
+                                                        if (s.url == url && s.url != oldItem.url) {
+                                                            ToastUtils.showLong("该地址与" + s.name + "相同")
+                                                            return
+                                                        }
+                                                    }
+                                                    oldItem.name = name
+                                                    oldItem.url = url
+                                                    mSubscriptionAdapter.notifyItemChanged(position)
+                                                }
+
+                                                override fun chooseLocal(checked: Boolean) {
+                                                }
+                                            })
+                                    ).show()
+                            }
+                            3 -> {
                                 ClipboardUtils.copyText(mSubscriptions.get(position).url)
                                 ToastUtils.showLong("已复制")
                             }

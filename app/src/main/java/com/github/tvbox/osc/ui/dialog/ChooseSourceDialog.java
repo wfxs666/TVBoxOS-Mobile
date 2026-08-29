@@ -55,5 +55,11 @@ public class ChooseSourceDialog extends BottomPopupView {
                 }
             });
         });
+        getPopupImplView().post(() -> {
+            try {
+                com.github.tvbox.osc.util.Utils.themePopupRoot(getPopupImplView());
+            } catch (Exception e) {
+            }
+        });
     }
 }

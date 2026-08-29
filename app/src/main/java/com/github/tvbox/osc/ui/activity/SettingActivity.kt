@@ -18,6 +18,7 @@ import com.github.tvbox.osc.ui.adapter.SelectDialogAdapter.SelectDialogInterface
 import com.github.tvbox.osc.ui.dialog.BackupDialog
 import com.github.tvbox.osc.ui.dialog.LiveApiDialog
 import com.github.tvbox.osc.ui.dialog.SelectDialog
+import com.github.tvbox.osc.ui.dialog.ThemeColorDialog
 import com.github.tvbox.osc.util.FastClickCheckUtil
 import com.github.tvbox.osc.util.FileUtils
 import com.github.tvbox.osc.util.HawkConfig
@@ -34,6 +35,12 @@ import java.io.FileOutputStream
 import okhttp3.HttpUrl
 import tv.danmaku.ijk.media.player.IjkMediaPlayer
 import java.io.File
+import android.graphics.Color
+import com.bumptech.glide.Glide
+import android.widget.SeekBar
+import android.widget.LinearLayout
+import android.widget.TextView
+import android.view.Gravity
 
 /**
  * @author pj567
@@ -376,7 +383,7 @@ class SettingActivity : BaseVbActivity<ActivitySettingBinding>() {
             mBinding.llTheme.visibility = View.GONE
         }
         val oldTheme = Hawk.get(HawkConfig.THEME_TAG, 0)
-        val themes = arrayOf("跟随系统", "浅色", "深色")
+        val themes = arrayOf("跟随系统", "浅色", "深色", "自定义")
         mBinding.tvTheme.text = themes[oldTheme]
         mBinding.llTheme.setOnClickListener(View.OnClickListener { view: View? ->
             FastClickCheckUtil.check(view)
@@ -384,12 +391,19 @@ class SettingActivity : BaseVbActivity<ActivitySettingBinding>() {
             types.add(0)
             types.add(1)
             types.add(2)
+            types.add(3)
             val dialog = SelectDialog<Int>(this@SettingActivity)
             dialog.setTip("请选择")
+            dialog.setAllowClickSelected(true)
             dialog.setAdapter(object : SelectDialogInterface<Int?> {
                 override fun click(value: Int?, pos: Int) {
-                    mBinding.tvTheme.text = themes[value?:0]
-                    Hawk.put(HawkConfig.THEME_TAG, value)
+                    if (value == 3) {
+                        dialog.dismiss()
+                        showThemeColorDialog()
+                    } else {
+                        mBinding.tvTheme.text = themes[value?:0]
+                        Hawk.put(HawkConfig.THEME_TAG, value)
+                    }
                 }
 
                 override fun getDisplay(value: Int?): String {
@@ -415,8 +429,36 @@ class SettingActivity : BaseVbActivity<ActivitySettingBinding>() {
             dialog.show()
         })
 
+
         val bgImage = Hawk.get(HawkConfig.BG_IMAGE, "")
         mBinding.tvBgImage.text = if (bgImage.isNullOrEmpty()) "默认" else "自定义"
+
+        // 背景图片透明度
+        val bgAlpha = Hawk.get(HawkConfig.BG_IMAGE_ALPHA, 255)
+        mBinding.tvBgAlpha.text = String.format("%d%%", bgAlpha * 100 / 255)
+        mBinding.llBgAlpha.setOnClickListener { view: View? ->
+            FastClickCheckUtil.check(view)
+            showBgAlphaDialog(bgAlpha)
+        }
+
+        // 液态玻璃(统一控制菜单栏+设置页)
+        val glassMenu = Hawk.get(HawkConfig.GLASS_MENU, false)
+        mBinding.tvGlassMenu.text = if (glassMenu) "开启" else "关闭"
+        mBinding.llGlassMenu.setOnClickListener { view: View? ->
+            FastClickCheckUtil.check(view)
+            showGlassToggleDialog(HawkConfig.GLASS_MENU, mBinding.tvGlassMenu, "液态玻璃")
+        }
+
+        // 应用背景模糊(独立开关)
+        val glassApp = Hawk.get(HawkConfig.GLASS_APP, false)
+        mBinding.tvGlassApp.text = if (glassApp) "开启" else "关闭"
+        mBinding.llGlassApp.setOnClickListener { view: View? ->
+            FastClickCheckUtil.check(view)
+            showGlassToggleDialog(HawkConfig.GLASS_APP, mBinding.tvGlassApp, "应用背景模糊")
+        }
+
+        applySettingGlass()
+
         mBinding.llBgImage.setOnClickListener { view: View? ->
             FastClickCheckUtil.check(view)
             val types = ArrayList<Int>()
@@ -537,6 +579,148 @@ class SettingActivity : BaseVbActivity<ActivitySettingBinding>() {
         }
     }
 
+
+    /** 背景图片透明度滑条对话框 */
+    private fun showBgAlphaDialog(current: Int) {
+        val holder = object {
+            var value = current
+        }
+        val root = LinearLayout(this)
+        root.orientation = LinearLayout.VERTICAL
+        root.setPadding(60, 24, 60, 24)
+        root.background = resources.getDrawable(R.drawable.bg_large_round_popup)
+        val title = TextView(this)
+        title.text = "背景图片透明度"
+        title.setTextColor(resources.getColor(R.color.text_foreground))
+        title.textSize = 16f
+        root.addView(title)
+        val seek = SeekBar(this)
+        seek.max = 255
+        seek.progress = current
+        seek.layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        ).apply { topMargin = 20 }
+        seek.progressTintList = android.content.res.ColorStateList.valueOf(0xFF567DF4.toInt())
+        root.addView(seek)
+        val tvValue = TextView(this)
+        tvValue.text = String.format("%d%%", current * 100 / 255)
+        tvValue.setTextColor(resources.getColor(R.color.text_sub_foreground))
+        tvValue.textSize = 13f
+        tvValue.gravity = Gravity.END
+        root.addView(tvValue)
+        val btnRow = LinearLayout(this)
+        btnRow.orientation = LinearLayout.HORIZONTAL
+        btnRow.layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        ).apply { topMargin = 16 }
+        val btnOk = TextView(this)
+        btnOk.text = "确 定"
+        btnOk.textSize = 14f
+        btnOk.setPadding(0, 12, 0, 12)
+        btnOk.gravity = Gravity.CENTER
+        btnOk.layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+        btnOk.setTextColor(resources.getColor(R.color.colorPrimary))
+        btnRow.addView(btnOk)
+        root.addView(btnRow)
+        // 使用简单自定义Dialog:标题+滑条+确定
+        val dialog = android.app.Dialog(this)
+        dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE)
+        dialog.setContentView(root)
+        dialog.setCanceledOnTouchOutside(true)
+        seek.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(sb: SeekBar?, progress: Int, fromUser: Boolean) {
+                holder.value = progress
+                tvValue.text = String.format("%d%%", progress * 100 / 255)
+            }
+
+            override fun onStartTrackingTouch(sb: SeekBar?) {}
+
+            override fun onStopTrackingTouch(sb: SeekBar?) {}
+        })
+        btnOk.setOnClickListener {
+            Hawk.put(HawkConfig.BG_IMAGE_ALPHA, holder.value)
+            mBinding.tvBgAlpha.text = String.format("%d%%", holder.value * 100 / 255)
+            ToastUtils.showShort("已保存,重新打开主页生效")
+            dialog.dismiss()
+        }
+        dialog.show()
+    }
+
+    /** 玻璃效果开关(SelectDialog: 关闭/开启) */
+    private fun showGlassToggleDialog(key: String, tv: TextView, tip: String) {
+        val types = ArrayList<Int>()
+        types.add(0)
+        types.add(1)
+        val dialog = SelectDialog<Int>(this@SettingActivity)
+        dialog.setTip(tip)
+        dialog.setAdapter(object : SelectDialogInterface<Int?> {
+            override fun click(value: Int?, pos: Int) {
+                val on = (value ?: 0) == 1
+                Hawk.put(key, on)
+                tv.text = if (on) "开启" else "关闭"
+                // 液态玻璃开关同时刷新设置页自身背景
+                if (key == HawkConfig.GLASS_MENU) {
+                    applySettingGlass()
+                }
+                ToastUtils.showShort("已保存,重新打开主页生效")
+            }
+
+            override fun getDisplay(value: Int?): String {
+                return if (value == 1) "开启" else "关闭"
+            }
+        }, object : DiffUtil.ItemCallback<Int>() {
+            override fun areItemsTheSame(oldItem: Int, newItem: Int): Boolean {
+                return oldItem == newItem
+            }
+
+            override fun areContentsTheSame(oldItem: Int, newItem: Int): Boolean {
+                return oldItem == newItem
+            }
+        }, types, if (Hawk.get(key, false)) 1 else 0)
+        dialog.show()
+    }
+
+    /** 设置页液态玻璃: 显示模糊背景图(跟随GLASS_MENU总开关) */
+    private fun applySettingGlass() {
+        val glass = Hawk.get(HawkConfig.GLASS_MENU, false)
+        val bg = Hawk.get(HawkConfig.BG_IMAGE, "")
+        if (glass && !bg.isNullOrEmpty() && File(bg).exists()) {
+            mBinding.ivBg.visibility = View.VISIBLE
+            mBinding.ivBg.setImageAlpha(Hawk.get(HawkConfig.BG_IMAGE_ALPHA, 255))
+            Glide.with(this).load(File(bg)).centerCrop().into(mBinding.ivBg)
+            Utils.applyBlur(mBinding.ivBg, 28f)
+            // 卡片半透明玻璃(保留圆角)
+            val glassCard = android.graphics.drawable.GradientDrawable().apply {
+                shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+                cornerRadius = resources.getDimension(R.dimen.common_corners)
+                setColor(android.graphics.Color.argb(153, 255, 255, 255))
+            }
+            for (card in listOf(mBinding.card1, mBinding.card2, mBinding.card3)) {
+                card.background = glassCard
+            }
+        } else {
+            mBinding.ivBg.visibility = View.GONE
+            for (card in listOf(mBinding.card1, mBinding.card2, mBinding.card3)) {
+                card.setBackgroundResource(R.drawable.bg_large_round_gray)
+            }
+        }
+    }
+
+    private fun showThemeColorDialog() {
+        XPopup.Builder(this@SettingActivity)
+            .autoFocusEditText(false)
+            .asCustom(ThemeColorDialog(this@SettingActivity) { bg, _ ->
+                mBinding.tvTheme.text = "自定义"
+                ToastUtils.showShort("主题色已保存,重新打开主页生效")
+                // 触发主页重建以应用新颜色
+                val bundle = Bundle()
+                bundle.putBoolean(IntentKey.CACHE_CONFIG_CHANGED, true)
+                jumpActivity(MainActivity::class.java, bundle)
+            })
+            .show()
+    }
     companion object {
         private const val REQ_CODE_BG = 101
     }

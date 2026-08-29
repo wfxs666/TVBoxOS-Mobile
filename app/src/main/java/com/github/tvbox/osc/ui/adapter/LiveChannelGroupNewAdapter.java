@@ -33,7 +33,7 @@ public class LiveChannelGroupNewAdapter extends BaseQuickAdapter<LiveChannelGrou
         int groupIndex = item.getGroupIndex();
         if (groupIndex == selectedGroupIndex && groupIndex != focusedGroupIndex) {
             tvGroupName.setTextColor(mContext.getResources().getColor(R.color.white));
-            root.setBackground(mContext.getResources().getDrawable(R.drawable.bg_r_common_solid_primary));
+            root.setBackground(com.github.tvbox.osc.util.Utils.getThemeSelectedBgOrDefault(mContext));
         } else {
             tvGroupName.setTextColor(ColorUtils.getColor(R.color.text_foreground));
             root.setBackground(mContext.getResources().getDrawable(R.drawable.bg_transparent));

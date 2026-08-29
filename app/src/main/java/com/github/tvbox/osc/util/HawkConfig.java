@@ -62,6 +62,17 @@ public class HawkConfig {
      * 主题,跟随系统0,浅1,深2
      */
     public static final String THEME_TAG = "theme_tag";
+    public static final String THEME_COLOR = "theme_color";
+    /** 自定义文字颜色(主题色上的文字/图标),空=自动对比色 */
+    public static final String THEME_TEXT_COLOR = "theme_text_color";
+    /** 背景图片透明度 0-255 */
+    public static final String BG_IMAGE_ALPHA = "bg_image_alpha";
+    /** 菜单栏(底部导航)液态玻璃 */
+    public static final String GLASS_MENU = "glass_menu";
+    /** 应用本身(主页背景)高斯模糊 */
+    public static final String GLASS_APP = "glass_app";
+    /** 设置页等其他页面液态玻璃 */
+    public static final String GLASS_SETTING = "glass_setting";
     /**
      * 自定义背景图片路径/URL,空为默认
      */

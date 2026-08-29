@@ -68,5 +68,11 @@ public class AllVodSeriesBottomDialog extends BottomPopupView {
             mSelectListener.onSelect(position,"");
         });
 
+        getPopupImplView().post(() -> {
+            try {
+                com.github.tvbox.osc.util.Utils.themePopupRoot(getPopupImplView());
+            } catch (Exception e) {
+            }
+        });
     }
 }

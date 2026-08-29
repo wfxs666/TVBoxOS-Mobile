@@ -42,6 +42,12 @@ public class PlayingControlDialog extends BottomPopupView {
 
         initView();
         initListener();
+        getPopupImplView().post(() -> {
+            try {
+                com.github.tvbox.osc.util.Utils.themePopupRoot(getPopupImplView());
+            } catch (Exception e) {
+            }
+        });
     }
 
     private void initView(){

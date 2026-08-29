@@ -25,6 +25,14 @@ public class SeriesFlagAdapter extends BaseQuickAdapter<VodInfo.VodSeriesFlag, B
         View select = helper.getView(R.id.vFlag);
         if (item.selected) {
             select.setVisibility(View.VISIBLE);
+            // 下划线跟随自定义主题色
+            int tc = com.github.tvbox.osc.util.Utils.getThemeColor();
+            if (tc != -1) {
+                try {
+                    select.setBackgroundColor(tc);
+                } catch (Exception e) {
+                }
+            }
         } else {
             select.setVisibility(View.GONE);
         }

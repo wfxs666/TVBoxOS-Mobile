@@ -36,6 +36,16 @@ public class SeriesAdapter extends BaseQuickAdapter<VodInfo.VodSeries, BaseViewH
         sl.setSelected(item.selected);
         tvSeries.setText(item.name);
 
+        // 跟随自定义主题色(选中态默认蓝改为主题色)
+        int tc = com.github.tvbox.osc.util.Utils.getThemeColor();
+        if (tc != -1) {
+            try {
+                sl.setLayoutBackgroundTrue(tc);
+                sl.setStrokeColorTrue(tc);
+            } catch (Exception e) {
+            }
+        }
+
         if (!isGird){// 详情页横向展示时固定宽度
             ViewGroup.LayoutParams layoutParams = sl.getLayoutParams();
             layoutParams.width = ConvertUtils.dp2px(120);

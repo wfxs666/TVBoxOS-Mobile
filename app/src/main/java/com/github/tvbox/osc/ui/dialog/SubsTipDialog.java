@@ -42,5 +42,11 @@ public class SubsTipDialog extends BottomPopupView {
         binding.btnCancel.setOnClickListener(view -> {
             dismiss();
         });
+        getPopupImplView().post(() -> {
+            try {
+                com.github.tvbox.osc.util.Utils.themePopupRoot(getPopupImplView());
+            } catch (Exception e) {
+            }
+        });
     }
 }
