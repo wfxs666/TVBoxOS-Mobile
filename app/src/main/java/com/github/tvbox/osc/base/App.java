@@ -118,12 +118,17 @@ public class App extends MultiDexApplication {
         Hawk.put(HawkConfig.DEBUG_OPEN, false);
 
         putDefault(HawkConfig.HOME_REC, 0);                  //推荐: 0=豆瓣热播, 1=站点推荐
-        putDefault(HawkConfig.PLAY_TYPE, 2);                 //播放器: 0=系统, 1=IJK, 2=Exo
+        putDefault(HawkConfig.PLAY_TYPE, 2);                 //播放器: 1=IJK, 2=Exo (系统播放器已移除)
         putDefault(HawkConfig.IJK_CODEC, "硬解码");           //IJK解码: 软解码, 硬解码
         putDefault(HawkConfig.BACKGROUND_PLAY_TYPE,2);           //后台播放: 0 关闭,1 开启,2 画中画
         putDefault(HawkConfig.DOH_URL, 0);                   //安全DNS: 0=关闭, 1=腾讯, 2=阿里, 3=360, 4=Google, 5=AdGuard, 6=Quad9
         putDefault(HawkConfig.PLAY_SCALE, 0);                //画面缩放: 0=默认, 1=16:9, 2=4:3, 3=填充, 4=原始, 5=裁剪
         putDefault(HawkConfig.HISTORY_NUM, 2);                //历史记录数量: 0=30, 1=50, 2=70
+        Hawk.put(HawkConfig.PLAYER_IS_LIVE, false);
+        // 系统播放器已移除: 旧配置存 0 时兑底到 Exo(2)
+        if (Hawk.contains(HawkConfig.PLAY_TYPE) && Hawk.get(HawkConfig.PLAY_TYPE, 2) == 0) {
+            Hawk.put(HawkConfig.PLAY_TYPE, 2);
+        }
         putDefaultApi();
     }
 
